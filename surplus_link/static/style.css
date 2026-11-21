@@ -1,0 +1,86 @@
+/* SurplusLink base styles: mobile-first, single column by default. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+img,
+pre,
+table {
+  max-width: 100%;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+/* Banner shown on every page */
+.demo-banner {
+  background: #fff3cd;
+  border-bottom: 1px solid #e0a800;
+  padding: 8px 12px;
+  font-weight: 600;
+}
+
+.site-header {
+  padding: 12px;
+}
+
+.persona-line {
+  margin-top: 4px;
+}
+
+.site-footer {
+  background: #f1f1f1;
+  padding: 12px;
+  font-size: 0.9rem;
+  margin-top: 24px;
+}
+
+/* Buttons and links styled as buttons */
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  background: #1b5e20;
+  color: #fff;
+  text-decoration: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.persona-list {
+  list-style: none;
+  padding: 0;
+}
+
+.persona-list li {
+  margin-bottom: 8px;
+}
+
+/* Under 600px everything stacks in one column. */
+@media (max-width: 599px) {
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
