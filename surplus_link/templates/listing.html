@@ -2,7 +2,7 @@
 {% block title %}Listing #{{ listing.id }}{% endblock %}
 {% block content %}
 {% if show_created %}
-<div class="confirm" role="status"><strong>Posted.</strong> Your surplus listing is saved with status Posted. Matching and claiming come in a later milestone.</div>
+<div class="confirm" role="status"><strong>Posted.</strong> Your surplus listing is saved with status Posted. Matching is available now; claiming is coming later.</div>
 {% endif %}
 
 <h1>Listing #{{ listing.id }}</h1>
@@ -32,7 +32,7 @@
 
 <p>
   {% if current_persona and current_persona.role == 'donor' %}<a href="{{ url_for('donations.new_listing') }}">Post another</a>{% endif %}
-<p><a class="btn" href="{{ url_for('matching.listing_matches', listing_id=listing.id) }}">See ranked matches</a></p>
   <a href="{{ url_for('main.home') }}">Back to home</a>
 </p>
+<p><a class="btn" href="{{ url_for('matching.listing_matches', listing_id=listing.id) }}">See ranked matches</a></p>
 {% endblock %}
