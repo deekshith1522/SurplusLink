@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Ranked matches{% endblock %}
+{% block content %}
+<h1>Ranked matches for listing #{{ listing.id }}</h1>
+
+<dl class="listing">
+  <dt>Food</dt>
+  <dd>{{ listing.description }}</dd>
+  <dt>Quantity</dt>
+  <dd>{{ '%g' % listing.quantity_kg }} kg</dd>
+  <dt>Pickup-by (IST)</dt>
+  <dd>{{ listing.pickup_by_utc | ist }}</dd>
+  <dt>Storage</dt>
+  <dd>{{ listing.storage_type | capitalize }}</dd>
+  <dt>Allergens</dt>
+  <dd>{{ listing.allergens or "None declared" }}</dd>
+</dl>
+
+{% if not result.listing_open %}
+<div class="error-summary"><p>{{ result.listing_reason }}</p></div>
+{% else %}
+
+<h2>Receivers (NGOs)</h2>
+{% if not (result.receivers | selectattr("eligible") | list) %}
+<p class="notice">No suitable receivers right now. Reasons are listed below.</p>
+{% endif %}
+<ol class="matches">
+{% for r in result.receivers %}
+  <li class="match">
+    <h3>{{ r.name }}</h3>
+    {% if r.eligible %}
+    <p class="tag-eligible">Eligible</p>
+    <p>Score {{ r.score }} / 100</p>
+    <div class="table-wrap">
+    <table class="breakdown">
+      <thead><tr><th>Factor</th><th>Value</th><th>Points</th></tr></thead>
+      <tbody>
+      {% for b in r.breakdown %}
+        <tr><td>{{ b.factor }}</td><td>{{ b.value }}</td><td>{{ b.points }} / {{ b.max_points }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p>Distance {{ r.distance_km }} km, travel about {{ r.travel_min }} min (assumed)</p>
+    {% else %}
+    <p class="tag-ineligible">Not eligible</p>
+    <ul class="reasons">
+      {% for reason in r.reasons %}<li>{{ reason }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </li>
+{% endfor %}
+</ol>
+
+<h2>Volunteers</h2>
+{% if not (result.volunteers | selectattr("eligible") | list) %}
+<p class="notice">No suitable volunteers right now. Reasons are listed below.</p>
+{% endif %}
+<ol class="matches">
+{% for v in result.volunteers %}
+  <li class="match">
+    <h3>{{ v.name }}</h3>
+    {% if v.eligible %}
+    <p class="tag-eligible">Eligible</p>
+    <p>Score {{ v.score }} / 100</p>
+    <div class="table-wrap">
+    <table class="breakdown">
+      <thead><tr><th>Factor</th><th>Value</th><th>Points</th></tr></thead>
+      <tbody>
+      {% for b in v.breakdown %}
+        <tr><td>{{ b.factor }}</td><td>{{ b.value }}</td><td>{{ b.points }} / {{ b.max_points }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p>Distance {{ v.distance_km }} km, travel about {{ v.travel_min }} min (assumed)</p>
+    <p>Estimated collection {{ v.collection_time_ist }} IST</p>
+    {% else %}
+    <p class="tag-ineligible">Not eligible</p>
+    <ul class="reasons">
+      {% for reason in v.reasons %}<li>{{ reason }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </li>
+{% endfor %}
+</ol>
+{% endif %}
+
+<h2>Assumptions</h2>
+<ul>
+{% for a in result.assumptions %}
+  <li>{{ a }}</li>
+{% endfor %}
+</ul>
+
+<p><a href="{{ url_for('donations.listing_detail', listing_id=listing.id) }}">Back to listing</a></p>
+{% endblock %}
