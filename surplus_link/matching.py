@@ -403,6 +403,31 @@ def evaluate_listing(db, listing_id, now):
     return result
 
 
+def check_receiver_eligibility(db, listing_id, org_id, now):
+    """Re-evaluate one receiver against one listing, for the claim check.
+
+    Returns None if the listing or the NGO organisation does not exist.
+    Otherwise returns the same entry dict that evaluate_listing produces.
+    """
+    listing = db.execute(
+        "SELECT * FROM listing WHERE id = ?", (listing_id,)
+    ).fetchone()
+    if listing is None:
+        return None
+    org = db.execute(
+        "SELECT * FROM organisation WHERE id = ? AND org_type = 'ngo'",
+        (org_id,),
+    ).fetchone()
+    if org is None:
+        return None
+    donor = db.execute(
+        "SELECT * FROM organisation WHERE id = ?",
+        (listing["donor_org_id"],),
+    ).fetchone()
+    minutes_left = (parse_utc(listing["pickup_by_utc"]) - now).total_seconds() / 60.0
+    return _evaluate_receiver(db, listing, donor, org, now, minutes_left)
+
+
 @matching_bp.route("/listings/<int:listing_id>/matches")
 def listing_matches(listing_id):
     db = get_db()

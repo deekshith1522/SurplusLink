@@ -8,6 +8,7 @@ from flask import Blueprint, abort, redirect, render_template, request, url_for
 from werkzeug.datastructures import MultiDict
 
 from . import timeutils
+from .claiming import MESSAGES as CLAIM_MESSAGES, get_claimant
 from .db import get_db
 from .views import current_persona
 
@@ -186,13 +187,21 @@ def new_listing():
 
 @donations_bp.route("/listings/<int:listing_id>")
 def listing_detail(listing_id):
-    listing = get_listing(get_db(), listing_id)
+    db = get_db()
+    listing = get_listing(db, listing_id)
     if listing is None:
         abort(404)
     allergen_list = [a for a in (listing["allergens"] or "").split(",") if a]
+    claimant_name = get_claimant(db, listing_id)
+    claim_code = request.args.get("claim")
+    claim_message = CLAIM_MESSAGES.get(claim_code) if claim_code else None
+    claimed_ok = request.args.get("claimed") == "1"
     return render_template(
         "listing.html",
         listing=listing,
         allergen_list=allergen_list,
         show_created=request.args.get("created") == "1",
+        claimant_name=claimant_name,
+        claim_message=claim_message,
+        claimed_ok=claimed_ok,
     )
