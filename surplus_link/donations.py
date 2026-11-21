@@ -10,7 +10,9 @@ from werkzeug.datastructures import MultiDict
 from . import timeutils
 from .claiming import MESSAGES as CLAIM_MESSAGES, get_claimant
 from .db import get_db
+from .timeutils import now_utc, parse_utc, to_utc_iso
 from .views import current_persona
+from .volunteering import listing_timeline, expire_overdue, MESSAGES as VOL_MESSAGES
 
 donations_bp = Blueprint("donations", __name__)
 
@@ -188,14 +190,62 @@ def new_listing():
 @donations_bp.route("/listings/<int:listing_id>")
 def listing_detail(listing_id):
     db = get_db()
+    now = now_utc()
     listing = get_listing(db, listing_id)
     if listing is None:
         abort(404)
+    expire_overdue(db, now)
+    listing = get_listing(db, listing_id)
     allergen_list = [a for a in (listing["allergens"] or "").split(",") if a]
     claimant_name = get_claimant(db, listing_id)
     claim_code = request.args.get("claim")
     claim_message = CLAIM_MESSAGES.get(claim_code) if claim_code else None
     claimed_ok = request.args.get("claimed") == "1"
+
+    timeline = listing_timeline(db, listing_id)
+    vol_code = request.args.get("vol")
+    vol_message = VOL_MESSAGES.get(vol_code) if vol_code in VOL_MESSAGES else None
+    vol_ok_text = {
+        "accepted": "Pickup accepted. You are now assigned to collect this listing.",
+        "collected": "Collection recorded. Deliver the food to the receiver.",
+        "delivered": "Delivery recorded. The listing is delivered and the claim is completed.",
+    }.get(vol_code)
+    volunteer_row = db.execute(
+        "SELECT v.name FROM claim c JOIN volunteer v ON v.id = c.volunteer_id "
+        "WHERE c.listing_id = ? AND c.volunteer_id IS NOT NULL ORDER BY c.id DESC LIMIT 1",
+        (listing_id,),
+    ).fetchone()
+    volunteer_name = volunteer_row["name"] if volunteer_row else None
+
+    persona = current_persona()
+    can_accept = can_collect = can_deliver = False
+    if persona is not None and persona["role"] == "volunteer":
+        my_row = db.execute(
+            "SELECT volunteer_id FROM persona WHERE id = ?", (persona["id"],)
+        ).fetchone()
+        my_vid = my_row["volunteer_id"] if my_row else None
+        claim = db.execute(
+            "SELECT * FROM claim WHERE listing_id = ? AND status = 'active'", (listing_id,)
+        ).fetchone()
+        pickup_future = parse_utc(listing["pickup_by_utc"]) > now
+        if claim is not None:
+            can_accept = (
+                listing["status"] == "claimed"
+                and claim["volunteer_id"] is None
+                and pickup_future
+            )
+            can_collect = (
+                listing["status"] == "claimed"
+                and my_vid is not None
+                and claim["volunteer_id"] == my_vid
+                and pickup_future
+            )
+            can_deliver = (
+                listing["status"] == "collected"
+                and my_vid is not None
+                and claim["volunteer_id"] == my_vid
+            )
+
     return render_template(
         "listing.html",
         listing=listing,
@@ -204,4 +254,12 @@ def listing_detail(listing_id):
         claimant_name=claimant_name,
         claim_message=claim_message,
         claimed_ok=claimed_ok,
+        timeline=timeline,
+        vol_message=vol_message,
+        vol_ok_text=vol_ok_text,
+        volunteer_name=volunteer_name,
+        can_accept=can_accept,
+        can_collect=can_collect,
+        can_deliver=can_deliver,
+        last_updated_utc=to_utc_iso(now_utc()),
     )

@@ -55,6 +55,10 @@ def init_db():
     db = get_db()
     db.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
     db.commit()
+    columns = {row["name"] for row in db.execute("PRAGMA table_info(claim)").fetchall()}
+    if "assigned_at_utc" not in columns:
+        db.execute("ALTER TABLE claim ADD COLUMN assigned_at_utc TEXT")
+        db.commit()
 
 
 def count_rows():

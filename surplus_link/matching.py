@@ -428,6 +428,31 @@ def check_receiver_eligibility(db, listing_id, org_id, now):
     return _evaluate_receiver(db, listing, donor, org, now, minutes_left)
 
 
+def check_volunteer_eligibility(db, listing_id, volunteer_id, now):
+    """Re-evaluate one volunteer against one listing, for the accept check.
+
+    Returns None if the listing or the volunteer does not exist. Otherwise
+    returns the same entry dict that _evaluate_volunteer produces.
+    """
+    listing = db.execute(
+        "SELECT * FROM listing WHERE id = ?", (listing_id,)
+    ).fetchone()
+    if listing is None:
+        return None
+    volunteer = db.execute(
+        "SELECT * FROM volunteer WHERE id = ?", (volunteer_id,)
+    ).fetchone()
+    if volunteer is None:
+        return None
+    donor = db.execute(
+        "SELECT * FROM organisation WHERE id = ?",
+        (listing["donor_org_id"],),
+    ).fetchone()
+    pickup = parse_utc(listing["pickup_by_utc"])
+    minutes_left = (pickup - now).total_seconds() / 60.0
+    return _evaluate_volunteer(volunteer, listing, donor, now, pickup, minutes_left)
+
+
 @matching_bp.route("/listings/<int:listing_id>/matches")
 def listing_matches(listing_id):
     db = get_db()

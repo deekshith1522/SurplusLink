@@ -2,7 +2,7 @@
 {% block title %}Listing #{{ listing.id }}{% endblock %}
 {% block content %}
 {% if show_created %}
-<div class="confirm" role="status"><strong>Posted.</strong> Your surplus listing is saved with status Posted. Matching is available now; claiming is coming later.</div>
+<div class="confirm" role="status"><strong>Posted.</strong> Your surplus listing is saved with status Posted. Matching and claiming are available now. Volunteers accept pickups after a receiver claims the listing.</div>
 {% endif %}
 
 <h1>Listing #{{ listing.id }}</h1>
@@ -27,16 +27,26 @@
   <dt>Posted at (IST)</dt>
   <dd>{{ listing.created_at_utc | ist }}</dd>
 </dl>
-{% if claimed_ok %}<div class="confirm" role="status"><strong>Claimed.</strong> Your organisation has reserved this listing. Collection coordination comes in a later milestone.</div>{% endif %}
+{% if claimed_ok %}<div class="confirm" role="status"><strong>Claimed.</strong> Your organisation has reserved this listing. Volunteers can now accept the pickup from the volunteer board.</div>{% endif %}
 {% if claim_message %}<div class="error-summary" role="alert"><p>{{ claim_message }}</p></div>{% endif %}
 <p><strong>Claimed by:</strong> {% if claimant_name %}{{ claimant_name }}{% else %}Not yet claimed{% endif %}</p>
+<p><strong>Volunteer:</strong> {% if volunteer_name %}{{ volunteer_name }}{% else %}Not yet assigned{% endif %}</p>
+{% if vol_message %}<div class="error-summary" role="alert"><p>{{ vol_message }}</p></div>{% endif %}{% if vol_ok_text %}<div class="confirm" role="status">{{ vol_ok_text }}</div>{% endif %}
+{% if current_persona and current_persona.role == 'volunteer' %}
+  {% if can_accept %}<form method="post" action="{{ url_for('volunteering.accept_pickup_view', listing_id=listing.id) }}"><button type="submit" class="btn">Accept pickup</button></form>{% endif %}
+  {% if can_collect %}<form method="post" action="{{ url_for('volunteering.collect_view', listing_id=listing.id) }}"><button type="submit" class="btn">Mark collected</button></form>{% endif %}
+  {% if can_deliver %}<form method="post" action="{{ url_for('volunteering.deliver_view', listing_id=listing.id) }}"><button type="submit" class="btn">Mark delivered</button></form>{% endif %}
+{% endif %}
 {% if current_persona and current_persona.role == 'receiver' and listing.status == 'posted' %}<form method="post" action="{{ url_for('claiming.claim_view', listing_id=listing.id) }}"><button type="submit" class="btn">Claim for {{ current_persona.org_name }}</button></form>{% endif %}
 
 <p class="notice">Pickup-by is a donor-provided collection deadline, not a guarantee of food safety.</p>
+
+<section class="timeline" data-refresh-seconds="12"><h2>Status timeline</h2><p class="helper">Last updated <span id="last-updated">{{ last_updated_utc | ist }}</span>. <a href="{{ request.path }}">Refresh now</a></p><ol class="events">{% for e in timeline %}<li><strong>{{ e.to_status|capitalize }}</strong> at {{ e.at_utc | ist }}{% if e.actor %} by {{ e.actor }}{% endif %}{% if e.from_status == e.to_status %} (volunteer assigned){% endif %}</li>{% else %}<li>No status events recorded.</li>{% endfor %}</ol></section>
 
 <p>
   {% if current_persona and current_persona.role == 'donor' %}<a href="{{ url_for('donations.new_listing') }}">Post another</a>{% endif %}
   <a href="{{ url_for('main.home') }}">Back to home</a>
 </p>
 <p><a class="btn" href="{{ url_for('matching.listing_matches', listing_id=listing.id) }}">See ranked matches</a></p>
+<script src="{{ url_for('static', filename='refresh.js') }}" defer></script>
 {% endblock %}

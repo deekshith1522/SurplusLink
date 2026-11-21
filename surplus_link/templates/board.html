@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Volunteer board{% endblock %}
+{% block content %}
+<h1>Volunteer pickup board</h1>
+<p class="notice">Claimed listings waiting for a volunteer. Times are IST. Pickup-by is a donor-provided collection deadline, not a guarantee of food safety.</p>
+
+<section class="board" data-refresh-seconds="12">
+  <p class="helper">Last updated <span id="last-updated">{{ last_updated_utc | ist }}</span>. <a href="{{ request.path }}">Refresh now</a></p>
+
+  <h2>Open pickups</h2>
+  {% if board.open %}
+  <ol class="matches">
+    {% for item in board.open %}
+    <li class="match">
+      <h3>{{ item.description }}</h3>
+      <p>{{ item.quantity_kg }} kg from {{ item.donor_name }} to {{ item.receiver_name }}</p>
+      <p>Pickup-by {{ item.pickup_by_utc | ist }}</p>
+      {% if item.eligible %}
+      <p class="tag-eligible">Suitable for you</p>
+      <form method="post" action="{{ url_for('volunteering.accept_pickup_view', listing_id=item.listing_id) }}"><button type="submit" class="btn">Accept pickup</button></form>
+      {% else %}
+      <p class="tag-ineligible">Not suitable</p>
+      <ul class="reasons">
+        {% for r in item.reasons %}<li>{{ r }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="notice">No open pickups right now.</p>
+  {% endif %}
+
+  <h2>My pickups</h2>
+  {% if board.mine %}
+  <ol class="matches">
+    {% for item in board.mine %}
+    <li class="match">
+      <h3>{{ item.description }}</h3>
+      <p>Status: {{ item.status|capitalize }}</p>
+      <p>Pickup-by {{ item.pickup_by_utc | ist }}</p>
+      <p><a href="{{ url_for('donations.listing_detail', listing_id=item.listing_id) }}">Open listing and timeline</a></p>
+      {% if item.status == 'claimed' %}
+      <form method="post" action="{{ url_for('volunteering.collect_view', listing_id=item.listing_id) }}"><button type="submit" class="btn">Mark collected</button></form>
+      {% endif %}
+      {% if item.status == 'collected' %}
+      <form method="post" action="{{ url_for('volunteering.deliver_view', listing_id=item.listing_id) }}"><button type="submit" class="btn">Mark delivered</button></form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="notice">No pickups assigned to you yet.</p>
+  {% endif %}
+</section>
+
+<script src="{{ url_for('static', filename='refresh.js') }}" defer></script>
+{% endblock %}

@@ -109,4 +109,11 @@ ul.reasons { padding-left:1.1rem; margin:0.3rem 0; }
 ol.matches { padding:0; list-style:none; }
 form { margin: 0.5rem 0; }
 button.btn { border: 0; font: inherit; cursor: pointer; }
+.timeline { margin-top: 1.25rem; }
+ol.events { padding-left: 1.2rem; }
+ol.events li { margin-bottom: 0.35rem; overflow-wrap: anywhere; }
+section.timeline .helper, section.board .helper { margin: 0.25rem 0 0.5rem; }
+.match form { max-width: 100%; }
+.match button { max-width: 100%; }
+@media (max-width: 600px) { body { padding-left: 0.75rem; padding-right: 0.75rem; } dl.listing dd { overflow-wrap: anywhere; } }
 

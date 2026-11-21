@@ -25,6 +25,7 @@
     <a href="{{ url_for('main.about') }}">About</a>
     {% if current_persona %}<a href="{{ url_for('main.switch') }}">Switch role</a>{% endif %}
 {% if current_persona and current_persona.role == 'donor' %}<a href="{{ url_for('donations.new_listing') }}">Post surplus</a>{% endif %}
+{% if current_persona and current_persona.role == 'volunteer' %}<a href="{{ url_for('volunteering.board') }}">Volunteer board</a>{% endif %}
   </nav>
   {% if current_persona %}
   <p class="acting">Acting as {{ current_persona.display_name }} ({{ current_persona.role }})</p>
