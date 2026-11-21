@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Listing #{{ listing.id }}{% endblock %}
+{% block content %}
+{% if show_created %}
+<div class="confirm" role="status"><strong>Posted.</strong> Your surplus listing is saved with status Posted. Matching and claiming come in a later milestone.</div>
+{% endif %}
+
+<h1>Listing #{{ listing.id }}</h1>
+
+<dl class="listing">
+  <dt>Status</dt>
+  <dd>{{ listing.status|capitalize }}</dd>
+  <dt>Food description</dt>
+  <dd>{{ listing.description }}</dd>
+  <dt>Quantity</dt>
+  <dd>{{ '%g' % listing.quantity_kg }} kg</dd>
+  <dt>Pickup-by deadline (IST)</dt>
+  <dd>{{ listing.pickup_by_utc | ist }}</dd>
+  <dt>Storage type</dt>
+  <dd>{{ listing.storage_type|capitalize }}</dd>
+  <dt>Handling information</dt>
+  <dd>{{ listing.handling_notes or "None given" }}</dd>
+  <dt>Allergens</dt>
+  <dd>{{ allergen_list|join(", ") if allergen_list else "None declared by donor" }}</dd>
+  <dt>Donor organisation</dt>
+  <dd>{{ listing.donor_name }}</dd>
+  <dt>Posted at (IST)</dt>
+  <dd>{{ listing.created_at_utc | ist }}</dd>
+</dl>
+
+<p class="notice">Pickup-by is a donor-provided collection deadline, not a guarantee of food safety.</p>
+
+<p>
+  {% if current_persona and current_persona.role == 'donor' %}<a href="{{ url_for('donations.new_listing') }}">Post another</a>{% endif %}
+  <a href="{{ url_for('main.home') }}">Back to home</a>
+</p>
+{% endblock %}

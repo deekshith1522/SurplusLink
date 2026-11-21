@@ -7,6 +7,7 @@ import click
 from flask import Flask
 
 from . import db, timeutils, views
+from .donations import donations_bp
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEV_SECRET_KEY = "dev-only-insecure-key"
@@ -35,6 +36,7 @@ def create_app(test_config=None):
 
     app.teardown_appcontext(db.close_db)
     app.register_blueprint(views.bp)
+    app.register_blueprint(donations_bp)
     app.add_template_filter(timeutils.format_ist, "ist")
 
     @app.cli.command("init-db")

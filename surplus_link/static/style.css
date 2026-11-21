@@ -84,3 +84,18 @@ pre {
     justify-content: center;
   }
 }
+
+.field { margin-bottom: 1rem; }
+.field label, fieldset legend { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+input[type=text], input[type=number], input[type=datetime-local], select, textarea { width: 100%; max-width: 100%; min-height: 44px; font-size: 1rem; padding: 0.5rem; box-sizing: border-box; border: 1px solid #888; border-radius: 4px; font-family: inherit; }
+textarea { min-height: 5rem; }
+.check { display: flex; align-items: center; min-height: 44px; gap: 0.5rem; }
+fieldset { border: 1px solid #ccc; border-radius: 6px; padding: 0.5rem 0.75rem; margin: 0 0 1rem; }
+.field-error { color: #a40000; margin: 0.25rem 0 0; font-weight: 600; }
+.error-summary { border: 2px solid #a40000; padding: 0.5rem 0.75rem; border-radius: 6px; margin-bottom: 1rem; color: #a40000; }
+.helper { color: #555; font-size: 0.9rem; margin: 0.25rem 0 0; }
+.notice { font-size: 0.9rem; color: #555; }
+.confirm { background: #e8f5e9; border: 1px solid #2e7d32; padding: 0.6rem 0.8rem; border-radius: 6px; margin-bottom: 1rem; }
+dl.listing dt { font-weight: 600; margin-top: 0.6rem; }
+dl.listing dd { margin: 0 0 0.2rem 0; overflow-wrap: anywhere; }
+
