@@ -4,7 +4,7 @@ Impact figures count delivered listings only, once per listing, computed from
 listing rows. No carbon or emissions figure is calculated.
 """
 
-import math
+from decimal import Decimal, ROUND_FLOOR, ROUND_HALF_UP
 
 from flask import Blueprint, render_template
 
@@ -13,12 +13,19 @@ from .db import get_db
 # Illustrative planning assumption: the one place to change the kg-per-meal figure.
 MEAL_KG = 0.4
 
-FORMULAS = [
-    "Delivered food (kg) = sum of quantity_kg across listings with status Delivered, each listing counted once.",
-    "Meal equivalents = delivered kg / 0.4 kg per meal, rounded down. 0.4 kg per meal is an illustrative planning assumption, not a measured portion.",
-    "Estimated food waste avoided (kg) = delivered kg. This assumes the food would otherwise have been discarded. It is an estimate, not an independently verified measurement.",
-    "Completed deliveries = number of listings with status Delivered.",
-]
+
+def build_formulas(meal_kg):
+    """Return the displayed formulas, with the kg-per-meal figure taken from meal_kg."""
+    m = f"{meal_kg:g}"
+    return [
+        "Delivered food (kg) = sum of quantity_kg across listings with status Delivered, each listing counted once.",
+        f"Meal equivalents = delivered kg / {m} kg per meal, rounded down. {m} kg per meal is an illustrative planning assumption, not a measured portion.",
+        "Estimated food waste avoided (kg) = delivered kg. This assumes the food would otherwise have been discarded. It is an estimate, not an independently verified measurement.",
+        "Completed deliveries = number of listings with status Delivered.",
+    ]
+
+
+FORMULAS = build_formulas(MEAL_KG)
 
 LIMITATIONS = [
     "Synthetic demo data only: organisations, people, locations and listings are invented.",
@@ -33,18 +40,25 @@ impact_bp = Blueprint("impact", __name__)
 
 def impact_summary(db):
     """Return delivered-only impact totals computed from listing rows."""
-    row = db.execute(
-        "SELECT COUNT(*) AS deliveries, COALESCE(SUM(quantity_kg), 0) AS delivered_kg "
-        "FROM listing WHERE status = 'delivered'"
-    ).fetchone()
-    deliveries = int(row["deliveries"])
-    delivered_kg = float(row["delivered_kg"])
-    meal_equivalents = int(math.floor(delivered_kg / MEAL_KG)) if deliveries else 0
+    rows = db.execute(
+        "SELECT quantity_kg FROM listing WHERE status = 'delivered'"
+    ).fetchall()
+    deliveries = len(rows)
+    total = Decimal("0")
+    for row in rows:
+        total += Decimal(str(row["quantity_kg"]))
+    if deliveries == 0:
+        meal_equivalents = 0
+    else:
+        meal_equivalents = int(
+            (total / Decimal(str(MEAL_KG))).to_integral_value(rounding=ROUND_FLOOR)
+        )
+    delivered_kg = float(total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
     return {
         "deliveries": deliveries,
-        "delivered_kg": round(delivered_kg, 1),
+        "delivered_kg": delivered_kg,
         "meal_equivalents": meal_equivalents,
-        "waste_avoided_kg": round(delivered_kg, 1),
+        "waste_avoided_kg": delivered_kg,
         "meal_kg": MEAL_KG,
         "is_zero": deliveries == 0,
     }
@@ -57,6 +71,6 @@ def dashboard():
     return render_template(
         "impact.html",
         summary=summary,
-        formulas=FORMULAS,
+        formulas=build_formulas(MEAL_KG),
         limitations=LIMITATIONS,
     )
