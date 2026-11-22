@@ -5,19 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <title>{% block title %}{% endblock %} - SurplusLink</title>
-  <style>
-    body { font-family: system-ui, sans-serif; margin: 0; padding: 0 1rem 2rem; line-height: 1.4; color: #1d1d1d; }
-    header, main, footer { max-width: 40rem; margin: 0 auto; }
-    header { padding-top: 1rem; }
-    nav a, ul.personas a { display: inline-flex; align-items: center; min-height: 44px; margin-right: 0.75rem; }
-    .badge { background: #fff3c4; border: 1px solid #c9a400; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85rem; }
-    .acting { background: #e8f4ff; padding: 0.4rem 0.6rem; border-radius: 4px; }
-    ul.personas { list-style: none; padding: 0; }
-    ul.personas li { padding: 0.5rem 0; border-bottom: 1px solid #eee; }
-    footer { margin-top: 2rem; font-size: 0.85rem; color: #555; }
-  </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <header>
   <strong>SurplusLink</strong> <span class="badge">Synthetic-data demo</span>
   <nav>
@@ -32,7 +22,7 @@
   <p class="acting">Acting as {{ current_persona.display_name }} ({{ current_persona.role }})</p>
   {% endif %}
 </header>
-<main>
+<main id="main" tabindex="-1">
   {% block content %}{% endblock %}
 </main>
 <footer>
