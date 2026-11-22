@@ -116,4 +116,6 @@ section.timeline .helper, section.board .helper { margin: 0.25rem 0 0.5rem; }
 .match form { max-width: 100%; }
 .match button { max-width: 100%; }
 @media (max-width: 600px) { body { padding-left: 0.75rem; padding-right: 0.75rem; } dl.listing dd { overflow-wrap: anywhere; } }
+.impact-grid { margin: 0.5rem 0 1rem; }
+.impact-grid dd { font-size: 1.1rem; font-weight: 600; }
 

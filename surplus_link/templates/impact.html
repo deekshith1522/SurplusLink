@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Impact dashboard{% endblock %}
+{% block content %}
+<h1>Impact dashboard</h1>
+<p class="notice">Synthetic-data demo: every organisation, person, location and listing is invented.</p>
+{% if summary.is_zero %}
+<div class="confirm" role="status"><strong>No deliveries recorded yet.</strong> Totals appear here once a volunteer marks a listing delivered. Posted, claimed and collected food is not counted as rescued until delivery.</div>
+{% endif %}
+<section class="impact-grid">
+<dl class="listing">
+<dt>Delivered food</dt><dd>{{ summary.delivered_kg }} kg</dd>
+<dt>Estimated meal equivalents</dt><dd>{{ summary.meal_equivalents }} (at {{ summary.meal_kg }} kg per meal, assumption)</dd>
+<dt>Estimated food waste avoided</dt><dd>{{ summary.waste_avoided_kg }} kg (assumed, not verified)</dd>
+<dt>Completed deliveries</dt><dd>{{ summary.deliveries }}</dd>
+</dl>
+</section>
+<h2>How the figures are calculated</h2>
+<ul>
+{% for f in formulas %}
+<li>{{ f }}</li>
+{% endfor %}
+</ul>
+<h2>Limitations</h2>
+<ul>
+{% for l in limitations %}
+<li>{{ l }}</li>
+{% endfor %}
+</ul>
+<p><a href="{{ url_for('main.home') }}">Back to home</a></p>
+{% endblock %}

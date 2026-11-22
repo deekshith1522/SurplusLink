@@ -11,6 +11,8 @@ from .donations import donations_bp
 from .matching import matching_bp
 from .claiming import claiming_bp
 from .volunteering import volunteering_bp
+from .impact import impact_bp
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEV_SECRET_KEY = "dev-only-insecure-key"
@@ -43,6 +45,7 @@ def create_app(test_config=None):
     app.register_blueprint(matching_bp)
     app.register_blueprint(claiming_bp)
     app.register_blueprint(volunteering_bp)
+    app.register_blueprint(impact_bp)
     app.add_template_filter(timeutils.format_ist, "ist")
 
     @app.cli.command("init-db")
