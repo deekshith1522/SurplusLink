@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <title>{% block title %}{% endblock %} - SurplusLink</title>
 </head>
-<body>
+<body class="{% block page_class %}{% endblock %}">
 <a class="skip-link" href="#main">Skip to main content</a>
 <header>
   <strong>SurplusLink</strong> <span class="badge">Synthetic-data demo</span>

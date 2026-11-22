@@ -1,20 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Choose a demo persona{% endblock %}
+{% block title %}Home{% endblock %}
+{% block page_class %}page-home{% endblock %}
 {% block content %}
-<h1>Choose a demo persona</h1>
-<p>Pick a synthetic persona to act as. No real accounts or personal details are used.</p>
-
-{% for role, label in [("donor", "Donors (messes)"), ("receiver", "Receivers (NGOs)"), ("volunteer", "Volunteers")] %}
-<section>
-  <h2>{{ label }}</h2>
-  <ul class="personas">
-    {% for p in groups[role] %}
-    <li>
-      <a href="{{ url_for('main.select_role', persona_id=p.id) }}">{{ p.display_name }}</a>
-      <span>- {{ p.org_name }}</span>
-    </li>
-    {% endfor %}
-  </ul>
+<section class="hero">
+  <h1>Rescue surplus food, one listing at a time</h1>
+  <p>Hostel messes post surplus cooked food. A nearby NGO can claim it and a volunteer can collect and deliver it. This is a pilot coordination tool running on synthetic data.</p>
 </section>
-{% endfor %}
+
+<div class="demo-notice" role="note">
+  <strong>Demo only.</strong> Pick a synthetic persona to act as. Switching persona is demo behaviour, not a login. No real account or personal detail is used.
+</div>
+
+<section aria-labelledby="roles-heading">
+  <h2 id="roles-heading">Choose a role to explore</h2>
+  <div class="role-cards">
+    <article class="role-card">
+      <h3>Donor (mess)</h3>
+      <p>Post surplus food in about a minute and see which receivers and volunteers can take it.</p>
+      {% if groups["donor"] %}
+      <ul class="persona-choices">
+        {% for p in groups["donor"] %}
+        <li><a class="btn btn-secondary" href="{{ url_for('main.select_role', persona_id=p.id) }}">{{ p.display_name }}</a> <span class="helper">{{ p.org_name }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="notice">No personas available yet. Run the seed command.</p>
+      {% endif %}
+    </article>
+
+    <article class="role-card">
+      <h3>Receiver (NGO)</h3>
+      <p>Browse surplus food, see why each listing fits, and claim it for your organisation.</p>
+      {% if groups["receiver"] %}
+      <ul class="persona-choices">
+        {% for p in groups["receiver"] %}
+        <li><a class="btn btn-secondary" href="{{ url_for('main.select_role', persona_id=p.id) }}">{{ p.display_name }}</a> <span class="helper">{{ p.org_name }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="notice">No personas available yet. Run the seed command.</p>
+      {% endif %}
+    </article>
+
+    <article class="role-card">
+      <h3>Volunteer</h3>
+      <p>See pickups that need collecting and accept one you can reach in time.</p>
+      {% if groups["volunteer"] %}
+      <ul class="persona-choices">
+        {% for p in groups["volunteer"] %}
+        <li><a class="btn btn-secondary" href="{{ url_for('main.select_role', persona_id=p.id) }}">{{ p.display_name }}</a> <span class="helper">{{ p.org_name }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="notice">No personas available yet. Run the seed command.</p>
+      {% endif %}
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="workflow-heading">
+  <h2 id="workflow-heading">How a donation moves</h2>
+  <ol class="workflow">
+    <li>Post: a mess lists surplus food with quantity, storage, allergens and a pickup-by time.</li>
+    <li>Claim: a receiver organisation claims it if the listing is still open and fits its capacity and need.</li>
+    <li>Assign: a volunteer whose location, carrying capacity and availability suit the pickup accepts it.</li>
+    <li>Collect: the assigned volunteer marks it collected before the pickup-by time.</li>
+    <li>Deliver: the volunteer marks it delivered. Only delivered food counts in the impact figures.</li>
+  </ol>
+  <p class="notice">SurplusLink coordinates donations and does not certify food safety. Pickup-by is a donor-provided collection deadline, not a guarantee of food safety.</p>
+</section>
+
+<p><a href="{{ url_for('impact.dashboard') }}">See the impact dashboard</a> · <a href="{{ url_for('main.about') }}">About and business models</a></p>
 {% endblock %}
