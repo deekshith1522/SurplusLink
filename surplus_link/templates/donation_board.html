@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Donation board{% endblock %}
+{% block content %}
+<h1>Donation board</h1>
+<p>Open surplus food from hostel messes. Anyone can browse. Only receiver personas can claim, and the listing page explains each claim check. Times are IST. Pickup-by is a donor-provided collection deadline, not a guarantee of food safety.</p>
+<p class="notice">Synthetic-data demo: donors, receivers and listings are invented.</p>
+
+<form method="get" action="{{ url_for('board.board_view') }}" class="board-filters" role="search" aria-label="Filter donations">
+  <div class="field"><label for="q">Search food, donor or allergen</label><input type="text" id="q" name="q" value="{{ q }}" maxlength="100" autocomplete="off"></div>
+  <div class="field"><label for="storage">Storage type</label><select id="storage" name="storage">{% for value, label in storage_options %}<option value="{{ value }}"{% if value == storage %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <button type="submit" class="btn">Apply filters</button>
+  {% if is_filtered %}<a class="btn btn-secondary" href="{{ url_for('board.board_view') }}">Reset filters</a>{% endif %}
+</form>
+
+<div id="results" aria-live="polite">
+{% if items %}
+  <p class="helper">{{ items|length }} open donation(s), soonest pickup deadline first.</p>
+  <ol class="cards">
+    {% for item in items %}
+    <li class="card listing-card">
+      <h2 class="listing-title">{{ item.description }}</h2>
+      <dl class="listing">
+        <dt>Quantity</dt>
+        <dd>{{ '%g' % item.quantity_kg }} kg</dd>
+        <dt>Storage</dt>
+        <dd>{{ item.storage_label }}</dd>
+        <dt>Allergens</dt>
+        <dd>{{ item.allergens|join(", ") or "None declared" }}</dd>
+        <dt>Donor</dt>
+        <dd>{{ item.donor_name }}</dd>
+        <dt>Pickup-by (IST)</dt>
+        <dd>{{ item.pickup_by_ist }}</dd>
+      </dl>
+      <a class="btn btn-secondary" href="{{ url_for('donations.listing_detail', listing_id=item.id) }}">View details<span class="visually-hidden"> for {{ item.description }}</span></a>
+    </li>
+    {% endfor %}
+  </ol>
+{% elif is_filtered and total_open > 0 %}
+  <div class="notice" role="status">
+    <p><strong>No donations match these filters.</strong> Try a different search word or storage type, or reset the filters.</p>
+    <a class="btn btn-secondary" href="{{ url_for('board.board_view') }}">Reset filters</a>
+  </div>
+{% else %}
+  <div class="confirm" role="status"><strong>No open donations right now.</strong> New surplus appears here as soon as a mess posts it. Check back later.</div>
+{% endif %}
+</div>
+
+{% if viewer_role == 'receiver' %}
+<p class="helper">You are a receiver persona: open a listing to claim it.</p>
+{% elif viewer_role is none %}
+<p class="helper">Browsing as a visitor. Choose a receiver persona on the home page to claim food.</p>
+{% else %}
+<p class="helper">Only receiver personas can claim donations. You are browsing as a {{ viewer_role }}.</p>
+{% endif %}
+
+<p><a href="{{ url_for('main.home') }}">Back to home</a></p>
+{% endblock %}

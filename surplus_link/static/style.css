@@ -577,3 +577,14 @@ ul.persona-choices { grid-template-columns: 1fr; }
 ul.persona-choices li { min-width: 0; }
 ul.persona-choices .btn-secondary { width: 100%; min-height: 44px; white-space: normal; overflow-wrap: anywhere; }
 
+/* ---------- Donation board (CP3) ---------- */
+.board-filters { display: grid; gap: var(--s3); grid-template-columns: 1fr; align-items: end; margin: var(--s3) 0 var(--s4); }
+.board-filters .btn { width: 100%; }
+@media (min-width: 600px) { .board-filters { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; } .board-filters .btn { width: auto; } }
+ol.cards { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s3); }
+.listing-card { margin: 0; }
+.listing-title { margin: 0 0 var(--s2); font-size: 1.1rem; overflow-wrap: anywhere; }
+.listing-card .btn { margin-top: var(--s2); }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+
